@@ -163,7 +163,10 @@ const contrastState = imageState[imageStateIndex].contrast[saturationStateIndex]
 // for reseting the image
 
 const resetBtn = document.getElementById('resetBtn')
-resetBtn.addEventListener('click', () => resetImageState())
+resetBtn.addEventListener('click', () => {
+  resetImageState()
+  if(!image) return alert('Please upload an image first');
+})
 
 
 if (uploadedImage) renderImageFilters();
