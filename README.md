@@ -4,8 +4,11 @@
 
 A browser-based photo editor that lets you upload, edit, and export images with real-time filters and effects.
 
+![Photo Editor Demo](https://via.placeholder.com/800x400?text=Rex+Photo+Editor+Demo)
+
 ## ✨ Live Demo
 
+[Add your GitHub Pages link here when you deploy]
 
 ## 🎯 Features
 
@@ -18,9 +21,16 @@ A browser-based photo editor that lets you upload, edit, and export images with 
 - **Undo/Redo** - History stack for filter adjustments
 - **Reset All** - One-click reset to original image
 
+### Coming Soon 🚧
+
+- Sepia filter
+- Blur effect
+- Crop & rotate tools
+- Keyboard shortcuts
+
 ## 🛠️ Built With
 
 - **Vanilla JavaScript (ES6+)** - No frameworks, just pure JS
 - **HTML5 Canvas API** - For image export with filters applied
 - **CSS3** - Custom properties, animations, and responsive design
-- **CSS Grid & Flexbox** - Responsive layout.
+- **CSS Grid & Flexbox** - Responsive layout

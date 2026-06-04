@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rex Photo Editor</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+  <div id="app">
+    <header class="header">
+      <div class="header-content">
+        <div class="logo">
+          <i class="fas fa-camera-retro"></i>
+          <h1>Rex<span>Photo</span></h1>
+        </div>
+        <div class="theme-toggle">
+          <i class="fas fa-moon"></i>
+          <label class="switch">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider"></span>
+          </label>
+          <i class="fas fa-sun"></i>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div id="editorContainer" class="editor-container">
+        <div id="photoContainer" class="drop-zone">
+          <div class="container" id="imageContainer">
+            <!-- Upload Photos Section -->
+            <div class="upload-area" id="uploadArea">
+              <input type="file" name="photo" id="photoInput" accept=".jpg,.jpeg,.png" style="display: none;">
+              <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+              </div>
+              <div class="upload-text">Drag & Drop your image here or <span class="browse-text">browse</span></div>
+              <div class="upload-hint">Supports JPG, JPEG, PNG (Max 5MB)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="editor-tools-container">
+          <div class="tools-header">
+            <h2><i class="fas fa-sliders-h"></i> Edit Tools</h2>
+            <div class="tool-actions">
+              <button class="tool-btn" id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
+              <button class="tool-btn primary" id="saveBtn"><i class="fas fa-download"></i> Save</button>
+            </div>
+          </div>
+
+          <div id="editorTools" class="editor-tools">
+            <div class="tool">
+              <div class="tool-header">
+                <i class="fas fa-sun"></i>
+                <span>Brightness</span>
+                <span class="tool-value" id="brightnessValue">100%</span>
+              </div>
+              <input type="range" min="0" max="200" value="100" class="tool-slider" id="brightnessSlider">
+            </div>
+
+            <div class="tool">
+              <div class="tool-header">
+                <i class="fas fa-palette"></i>
+                <span>Saturation</span>
+                <span class="tool-value" id="saturationValue">100%</span>
+              </div>
+              <input type="range" min="0" max="200" value="100" class="tool-slider" id="saturationSlider">
+            </div>
+
+            <div class="tool">
+              <div class="tool-header">
+                <i class="fas fa-adjust"></i>
+                <span>Contrast</span>
+                <span class="tool-value" id="contrastValue">100%</span>
+              </div>
+              <input type="range" min="0" max="200" value="100" class="tool-slider" id="contrastSlider">
+            </div>
+
+            <div class="tool">
+              <div class="tool-header">
+                <i class="fas fa-tint"></i>
+                <span>Sepia</span>
+                <span class="tool-value" id="sepiaValue">0%</span>
+              </div>
+              <input type="range" min="0" max="100" value="0" class="tool-slider" id="sepiaSlider">
+            </div>
+
+            <div class="tool">
+              <div class="tool-header">
+                <i class="fas fa-water"></i>
+                <span>Blur</span>
+                <span class="tool-value" id="blurValue">0px</span>
+              </div>
+              <input type="range" min="0" max="20" value="0" class="tool-slider" id="blurSlider">
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>Rex Photo Editor &copy; <span id="currentYear"></span> • Drag, drop, and edit your images with ease</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

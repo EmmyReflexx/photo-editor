@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rex Photo</title>
+
+    <style>
+      :root {
+        --bg-primary: #0f0f0f;
+        --bg-secondary: #1a1a1a;
+        --bg-tertiary: #242424;
+        --border-color: #2a2a2a;
+        --border-hover: #3a3a3a;
+        --accent-color: #6366f1;
+        --accent-hover: #4f46e5;
+        --text-primary: #e5e5e5;
+        --text-secondary: #a0a0a0;
+        --text-muted: #737373;
+        --shadow: rgba(0, 0, 0, 0.5);
+        --glow: rgba(99, 102, 241, 0.3);
+        --border-radius: 12px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      [data-theme="light"] {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8f9fa;
+        --bg-tertiary: #e9ecef;
+        --border-color: #dee2e6;
+        --border-hover: #cbd5e0;
+        --accent-color: #6366f1;
+        --accent-hover: #4f46e5;
+        --text-primary: #1a202c;
+        --text-secondary: #4a5568;
+        --text-muted: #718096;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --glow: rgba(99, 102, 241, 0.2);
+        --border-radius: 12px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Inter", sans-serif;
+        color: var(--text-primary);
+        background: linear-gradient(
+          135deg,
+          var(--bg-primary) 0%,
+          var(--bg-secondary) 100%
+        );
+        line-height: 1.6;
+        min-height: 100vh;
+        transition: background 0.3s ease, color 0.3s ease;
+      }
+
+      [data-theme="light"] body {
+        background: linear-gradient(135deg, #f0f4f8 0%, #ffffff 100%);
+      }
+
+      header {
+        background: rgba(26, 26, 26, 0.8);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border-color);
+        padding: 20px 40px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      header h1 {
+        font-size: 24px;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.5px;
+      }
+
+      .theme-toggle {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--bg-tertiary);
+        padding: 8px 16px;
+        border-radius: 50px;
+        border: 1px solid var(--border-color);
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .theme-toggle::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--glow),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .theme-toggle:hover::before {
+        left: 100%;
+      }
+
+      .theme-toggle:hover {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 20px var(--glow);
+      }
+
+      .theme-icon {
+        width: 22px;
+        height: 22px;
+        transition: var(--transition);
+        position: relative;
+        z-index: 1;
+      }
+
+      .theme-toggle:hover .theme-icon {
+        transform: rotate(20deg) scale(1.1);
+      }
+
+      .theme-icon svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .theme-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        position: relative;
+        z-index: 1;
+      }
+
+      #editorContainer {
+        display: flex;
+        flex-direction: column;
+        min-height: calc(100vh - 80px);
+        padding: 30px 40px;
+        max-width: 1600px;
+        margin: 0 auto;
+        gap: 30px;
+      }
+
+      #photoContainer {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        border: 2px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+        transition: var(--transition);
+        min-height: 500px;
+      }
+
+      #photoContainer.active {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 4px var(--glow);
+      }
+
+      #photoContainer:hover {
+        border-color: var(--border-hover);
+      }
+
+      #photoContainer .container {
+        width: 100%;
+        min-height: 300px;
+        max-width: 1200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        padding: 20px;
+        margin: 0 auto;
+        box-sizing: border-box;
+      }
+
+      .uploaded-image {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+        transition: transform 0.3s ease;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+      }
+
+      .upload-area {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 40px;
+        text-align: center;
+        width: 100%;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .upload-area:hover .upload-icon {
+        transform: scale(1.1);
+      }
+
+      .upload-icon {
+        font-size: 72px;
+        margin-bottom: 24px;
+        opacity: 0.6;
+        transition: var(--transition);
+        filter: grayscale(1);
+      }
+
+      .upload-text {
+        font-size: 20px;
+        margin-bottom: 12px;
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+
+      .browse-text {
+        color: var(--accent-color);
+        text-decoration: none;
+        font-weight: 600;
+        position: relative;
+        transition: var(--transition);
+      }
+
+      .browse-text::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--accent-color);
+        transform: scaleX(0);
+        transition: var(--transition);
+      }
+
+      .upload-area:hover .browse-text::after {
+        transform: scaleX(1);
+      }
+
+      .upload-hint {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-top: 8px;
+      }
+
+      .action-button {
+        position: absolute;
+        bottom: 30px;
+        right: 30px;
+        background: var(--accent-color);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      }
+
+      .action-button:hover {
+        background: var(--accent-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+      }
+
+      .action-button:active {
+        transform: translateY(0);
+      }
+
+      .error-message {
+        background: linear-gradient(
+          135deg,
+          rgba(239, 68, 68, 0.1),
+          rgba(220, 38, 38, 0.1)
+        );
+        border: 2px solid rgba(239, 68, 68, 0.3);
+        border-radius: var(--border-radius);
+        padding: 20px;
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        animation: slideIn 0.3s ease;
+      }
+
+      .error-icon {
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+      }
+
+      .error-icon svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .error-content {
+        flex: 1;
+      }
+
+      .error-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #ef4444;
+        margin-bottom: 4px;
+      }
+
+      .error-description {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      #editorTools {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 16px;
+        padding: 24px;
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        border: 1px solid var(--border-color);
+      }
+
+      #editorTools > div {
+        background: var(--bg-tertiary);
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: 500;
+        font-size: 15px;
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+
+      #editorTools > div .tool-icon {
+        width: 32px;
+        height: 32px;
+        transition: var(--transition);
+      }
+
+      #editorTools > div .tool-icon svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      #editorTools > div::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(99, 102, 241, 0.1),
+          transparent
+        );
+        transition: var(--transition);
+      }
+
+      #editorTools > div:hover {
+        border-color: var(--accent-color);
+        color: var(--text-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px var(--shadow);
+      }
+
+      #editorTools > div:hover .tool-icon {
+        transform: scale(1.1);
+      }
+
+      #editorTools > div:hover .tool-icon svg {
+        filter: drop-shadow(0 2px 8px var(--glow));
+      }
+
+      #editorTools > div:hover::before {
+        left: 100%;
+      }
+
+      @media (max-width: 768px) {
+        header {
+          padding: 16px 20px;
+        }
+
+        header h1 {
+          font-size: 20px;
+        }
+
+        #editorContainer {
+          padding: 20px;
+          gap: 20px;
+        }
+
+        #photoContainer {
+          min-height: 400px;
+        }
+
+        .upload-icon {
+          font-size: 56px;
+        }
+
+        .upload-text {
+          font-size: 18px;
+        }
+
+        #editorTools {
+          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+          gap: 12px;
+          padding: 16px;
+        }
+
+        #editorTools > div {
+          padding: 16px;
+          font-size: 14px;
+        }
+        #photoContainer .container {
+          padding: 15px;
+          min-height: 250px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        #photoContainer .container {
+          padding: 10px;
+          min-height: 200px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="app">
+      <header>
+        <h1>Rex Photo</h1>
+        <div class="theme-toggle" id="themeToggle">
+          <span class="theme-icon" id="themeIcon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                fill="currentColor"
+              />
+            </svg>
+          </span>
+          <span class="theme-label" id="themeLabel">Dark</span>
+        </div>
+      </header>
+
+      <main>
+        <div id="editorContainer" class="editor-container">
+          <div id="photoContainer" class="drop-zone">
+            <div class="container" id="imageContainer">
+              <div class="upload-area" id="uploadArea">
+                <input
+                  type="file"
+                  name="photo"
+                  id="photoInput"
+                  accept=".jpg,.jpeg,.png"
+                  style="display: none"
+                />
+                <div class="upload-icon">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                      stroke="var(--accent-color)"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      fill="none"
+                    />
+                    <circle
+                      cx="12"
+                      cy="13"
+                      r="4"
+                      stroke="var(--accent-color)"
+                      stroke-width="2"
+                      fill="var(--accent-color)"
+                      opacity="0.3"
+                    />
+                    <path
+                      d="M12 13V13.01"
+                      stroke="var(--accent-color)"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
+                    <path
+                      d="M17 8h.01"
+                      stroke="var(--accent-color)"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </div>
+                <div class="upload-text">
+                  Drag & Drop your image here or
+                  <span class="browse-text">browse</span>
+                </div>
+                <div class="upload-hint">Supports JPG, JPEG, PNG (Max 5MB)</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="editorTools">
+            <div>
+              <div class="tool-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="var(--accent-color)"
+                    stroke-width="2"
+                    fill="none"
+                  />
+                  <path
+                    d="M12 2a10 10 0 0 0 0 20"
+                    stroke="var(--accent-color)"
+                    stroke-width="2"
+                    fill="none"
+                  />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="6"
+                    fill="var(--accent-color)"
+                    opacity="0.3"
+                  />
+                </svg>
+              </div>
+              <span>Saturation</span>
+            </div>
+            <div>
+              <div class="tool-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    x="3"
+                    y="3"
+                    width="8"
+                    height="8"
+                    fill="var(--accent-color)"
+                    opacity="0.8"
+                  />
+                  <rect
+                    x="13"
+                    y="3"
+                    width="8"
+                    height="8"
+                    fill="var(--accent-color)"
+                    opacity="0.3"
+                  />
+                  <rect
+                    x="3"
+                    y="13"
+                    width="8"
+                    height="8"
+                    fill="var(--accent-color)"
+                    opacity="0.3"
+                  />
+                  <rect
+                    x="13"
+                    y="13"
+                    width="8"
+                    height="8"
+                    fill="var(--accent-color)"
+                  />
+                </svg>
+              </div>
+              <span>Contrast</span>
+            </div>
+            <div>
+              <div class="tool-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="8"
+                    cy="8"
+                    r="3"
+                    fill="var(--accent-color)"
+                    opacity="0.6"
+                    filter="url(#blur1)"
+                  />
+                  <circle
+                    cx="16"
+                    cy="8"
+                    r="3"
+                    fill="var(--accent-color)"
+                    opacity="0.6"
+                    filter="url(#blur1)"
+                  />
+                  <circle
+                    cx="8"
+                    cy="16"
+                    r="3"
+                    fill="var(--accent-color)"
+                    opacity="0.6"
+                    filter="url(#blur1)"
+                  />
+                  <circle
+                    cx="16"
+                    cy="16"
+                    r="3"
+                    fill="var(--accent-color)"
+                    opacity="0.6"
+                    filter="url(#blur1)"
+                  />
+                  <defs>
+                    <filter id="blur1">
+                      <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
+                    </filter>
+                  </defs>
+                </svg>
+              </div>
+              <span>Blur</span>
+            </div>
+            <div>
+              <div class="tool-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="5"
+                    stroke="var(--accent-color)"
+                    stroke-width="2"
+                    fill="var(--accent-color)"
+                    opacity="0.3"
+                  />
+                  <path
+                    d="M12 2v4M12 18v4M22 12h-4M6 12H2"
+                    stroke="var(--accent-color)"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+                  <path
+                    d="M17.66 6.34l-2.83 2.83M9.17 14.83l-2.83 2.83M17.66 17.66l-2.83-2.83M9.17 9.17L6.34 6.34"
+                    stroke="var(--accent-color)"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </div>
+              <span>Brightness</span>
+            </div>
+            <div>
+              <div class="tool-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    x="3"
+                    y="3"
+                    width="18"
+                    height="18"
+                    rx="2"
+                    stroke="var(--accent-color)"
+                    stroke-width="2"
+                    fill="none"
+                  />
+                  <path
+                    d="M3 3L21 21"
+                    stroke="var(--accent-color)"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+                  <circle
+                    cx="9"
+                    cy="9"
+                    r="2"
+                    fill="var(--accent-color)"
+                    opacity="0.6"
+                  />
+                  <circle
+                    cx="15"
+                    cy="15"
+                    r="2"
+                    fill="var(--accent-color)"
+                    opacity="0.4"
+                  />
+                </svg>
+              </div>
+              <span>Sepia</span>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const dropZone = document.getElementById("photoContainer");
+        const fileInput = document.getElementById("photoInput");
+        const uploadArea = document.getElementById("uploadArea");
+        const imageContainer = document.getElementById("imageContainer");
+        const themeToggle = document.getElementById("themeToggle");
+        const themeIcon = document.getElementById("themeIcon");
+        const themeLabel = document.getElementById("themeLabel");
+        const html = document.documentElement;
+
+        // Theme switching functionality
+        const savedTheme = localStorage.getItem("theme") || "dark";
+        html.setAttribute("data-theme", savedTheme);
+        updateThemeUI(savedTheme);
+
+        themeToggle.addEventListener("click", () => {
+          const currentTheme = html.getAttribute("data-theme");
+          const newTheme = currentTheme === "dark" ? "light" : "dark";
+          html.setAttribute("data-theme", newTheme);
+          localStorage.setItem("theme", newTheme);
+          updateThemeUI(newTheme);
+        });
+
+        function updateThemeUI(theme) {
+          const iconHTML =
+            theme === "light"
+              ? `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="currentColor"/>
+              <path d="M12 2v4M12 18v4M22 12h-4M6 12H2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M17.66 6.34l-2.83 2.83M9.17 14.83l-2.83 2.83M17.66 17.66l-2.83-2.83M9.17 9.17L6.34 6.34" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>`
+              : `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="currentColor"/>
+            </svg>`;
+
+          themeIcon.innerHTML = iconHTML;
+          themeLabel.textContent = theme === "light" ? "Light" : "Dark";
+        }
+
+        // Image upload functionality
+        uploadArea.addEventListener("click", () => fileInput.click());
+        fileInput.addEventListener("change", (e) =>
+          processFile(e.target.files[0])
+        );
+
+        dropZone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          dropZone.classList.add("active");
+        });
+
+        dropZone.addEventListener("dragleave", () => {
+          dropZone.classList.remove("active");
+        });
+
+        dropZone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          dropZone.classList.remove("active");
+          const files = e.dataTransfer.files;
+
+          if (files.length > 1) {
+            showError(
+              "Too Many Files",
+              "Please upload only one image at a time."
+            );
+            return;
+          }
+
+          processFile(files[0]);
+        });
+
+        function showError(title, description) {
+          imageContainer.innerHTML = `
+          <div class="upload-area" id="uploadArea">
+            <input type="file" name="photo" id="photoInput" accept=".jpg,.jpeg,.png" style="display: none;">
+            <div class="upload-icon">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <circle cx="12" cy="13" r="4" stroke="var(--accent-color)" stroke-width="2" fill="var(--accent-color)" opacity="0.3"/>
+                <path d="M12 13V13.01" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round"/>
+                <path d="M17 8h.01" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="upload-text">Drag & Drop your image here or <span class="browse-text">browse</span></div>
+            <div class="upload-hint">Supports JPG, JPEG, PNG (Max 5MB)</div>
+            <div class="error-message">
+              <div class="error-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="#ef4444" stroke-width="2" fill="none"/>
+                  <path d="M12 8v4M12 16h.01" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="error-content">
+                <div class="error-title">${title}</div>
+                <div class="error-description">${description}</div>
+              </div>
+            </div>
+          </div>
+        `;
+
+          const newUploadArea = document.getElementById("uploadArea");
+          const newFileInput = document.getElementById("photoInput");
+          newUploadArea.addEventListener("click", () => newFileInput.click());
+          newFileInput.addEventListener("change", (e) =>
+            processFile(e.target.files[0])
+          );
+        }
+
+        function processFile(file) {
+          if (!file) return;
+
+          if (!file.type.match("image.*")) {
+            showError(
+              "Invalid File Format",
+              "Please select a valid image file (JPG, JPEG, PNG)."
+            );
+            return;
+          }
+
+          if (file.size > 5 * 1024 * 1024) {
+            showError(
+              "File Too Large",
+              "File size exceeds 5MB. Please choose a smaller image."
+            );
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            imageContainer.innerHTML = `
+            <img class="uploaded-image" src="${e.target.result}" alt="Uploaded preview">
+            <button id="changeImage" class="action-button">Change Image</button>
+          `;
+
+            document
+              .getElementById("changeImage")
+              .addEventListener("click", resetUploader);
+          };
+
+          reader.readAsDataURL(file);
+        }
+
+        function resetUploader() {
+          imageContainer.innerHTML = `
+          <div class="upload-area" id="uploadArea">
+            <input type="file" name="photo" id="photoInput" accept=".jpg,.jpeg,.png" style="display: none;">
+            <div class="upload-icon">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <circle cx="12" cy="13" r="4" stroke="var(--accent-color)" stroke-width="2" fill="var(--accent-color)" opacity="0.3"/>
+                <path d="M12 13V13.01" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round"/>
+                <path d="M17 8h.01" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="upload-text">Drag & Drop your image here or <span class="browse-text">browse</span></div>
+            <div class="upload-hint">Supports JPG, JPEG, PNG (Max 5MB)</div>
+          </div>
+        `;
+
+          const newUploadArea = document.getElementById("uploadArea");
+          const newFileInput = document.getElementById("photoInput");
+          newUploadArea.addEventListener("click", () => newFileInput.click());
+          newFileInput.addEventListener("change", (e) =>
+            processFile(e.target.files[0])
+          );
+        }
+      });
+    </script>
+  </body>
+</html>
