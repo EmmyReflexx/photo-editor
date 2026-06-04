@@ -165,7 +165,7 @@ const contrastState = imageState[imageStateIndex].contrast[saturationStateIndex]
 const resetBtn = document.getElementById('resetBtn')
 resetBtn.addEventListener('click', () => {
   resetImageState()
-  if(!image) return alert('Please upload an image first');
+  image = false
 })
 
 
