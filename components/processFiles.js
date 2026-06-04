@@ -33,7 +33,10 @@ export function processFile(file) {
           `;
           image = true;
 
-    document.getElementById("changeImage").addEventListener("click", resetUploader);
+    document.getElementById("changeImage").addEventListener("click", ()=>{
+      resetUploader();
+      image = false
+    });
     checkExportAvailability()
   };
 
